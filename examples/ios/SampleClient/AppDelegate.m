@@ -25,7 +25,7 @@
 
 #import "AppDelegate.h"
 
-#import "../../../src/alohalytics_objc.h"
+#import "KnowSheet/alohalytics_objc.h"
 
 @interface AppDelegate ()
 
