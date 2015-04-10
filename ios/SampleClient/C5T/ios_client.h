@@ -45,13 +45,16 @@
 
 // Various logging methods.
 + (void)logEvent:(NSString *)event;
-+ (void)logEvent:(NSString *)event atLocation:(CLLocation *)location;
 + (void)logEvent:(NSString *)event withValue:(NSString *)value;
-+ (void)logEvent:(NSString *)event withValue:(NSString *)value atLocation:(CLLocation *)location;
 + (void)logEvent:(NSString *)event withKeyValueArray:(NSArray *)array;
-+ (void)logEvent:(NSString *)event withKeyValueArray:(NSArray *)array atLocation:(CLLocation *)location;
 + (void)logEvent:(NSString *)event withDictionary:(NSDictionary *)dictionary;
+
+#ifdef C5T_IOS_LOCATION_H
++ (void)logEvent:(NSString *)event atLocation:(CLLocation *)location;
++ (void)logEvent:(NSString *)event withValue:(NSString *)value atLocation:(CLLocation *)location;
++ (void)logEvent:(NSString *)event withKeyValueArray:(NSArray *)array atLocation:(CLLocation *)location;
 + (void)logEvent:(NSString *)event withDictionary:(NSDictionary *)dictionary atLocation:(CLLocation *)location;
+#endif  // #ifdef C5T_IOS_LOCATION_H
 
 @end
 
