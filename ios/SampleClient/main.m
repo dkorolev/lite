@@ -29,7 +29,7 @@
 
 int main(int argc, char * argv[]) {
   @autoreleasepool {
-      int result = UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+      const int result = UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
       [AlohalyticsLite logEvent:@"$leavingMain"];
       return result;
   }
