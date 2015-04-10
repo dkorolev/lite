@@ -1,7 +1,8 @@
 /*******************************************************************************
  The MIT License (MIT)
  
- Copyright (c) 2015
+ Copyright (c) 2015:
+ 
  * Dmitry "Dima" Korolev <dmitry.korolev@gmail.com>
  * Alexander Zolotarev <me@alex.bio> from Minsk, Belarus
  
@@ -28,7 +29,7 @@
 #error "This file must be compiled with ARC. Either turn on ARC for the project or use -fobjc-arc flag."
 #endif
 
-#import "alohalytics_objc.h"
+#import "ios_client.h"
 
 #include <string>
 #include <map>
@@ -57,9 +58,8 @@
 #import <AdSupport/ASIdentifierManager.h>
 #endif  // (TARGET_OS_IPHONE > 0)
 
-// using namespace alohalytics;
+namespace {
 
-// namespace {
 // Conversion from [possible nil] `NSString` to `std::string`.
 static std::string UnsafeToStdString(NSString *nsString) {
     if (nsString) {
@@ -387,11 +387,11 @@ private:
     }
 };
 
-// } // namespace
+} // namespace
 
-@implementation Alohalytics
+@implementation AlohalyticsLite
 
-// Safe extraction from [possible nil] CLLocation to alohalytics::Location.
+// Safe extraction from [possible nil] CLLocation to alohalytics_lite::Location.
 static Location ExtractLocation(CLLocation *l) {
     Location extracted;
     if (l) {
@@ -610,7 +610,6 @@ static void LogSystemInformation() {
     } else if (device.userInterfaceIdiom == UIUserInterfaceIdiomUnspecified) {
         userInterfaceIdiom = "unspecified";
     }
-    // alohalytics::
     std::map<std::string, std::string> info = {
         {"deviceName", UnsafeToStdString(device.name)},
         {"deviceSystemName", UnsafeToStdString(device.systemName)},
@@ -653,12 +652,14 @@ static void LogSystemInformation() {
 }
 #endif  // (TARGET_OS_IPHONE > 0)
 
+// The actual @implementation.
+
 + (void)setDebugMode:(BOOL)enable {
     Stats::Instance().SetDebugMode(enable);
 }
 
 + (void)setup:(NSString *)serverUrl withLaunchOptions:(NSDictionary *)options {
-    [Alohalytics setup:serverUrl andFirstLaunch:YES withLaunchOptions:options];
+    [AlohalyticsLite setup:serverUrl andFirstLaunch:YES withLaunchOptions:options];
 }
 
 + (void)setup:(NSString *)serverUrl

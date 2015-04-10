@@ -25,9 +25,12 @@
 #import <UIKit/UIKit.h>
 #import "AppDelegate.h"
 
+#import "C5T/ios_client.h"
+
 int main(int argc, char * argv[]) {
   @autoreleasepool {
-      // TODO(dkorolev): Log end of lifetime ("KILL") event as well.
-      return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+      int result = UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+      [AlohalyticsLite logEvent:@"$leavingMain"];
+      return result;
   }
 }

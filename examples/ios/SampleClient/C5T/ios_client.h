@@ -1,19 +1,21 @@
 /*******************************************************************************
  The MIT License (MIT)
-
- Copyright (c) 2015 Alexander Zolotarev <me@alex.bio> from Minsk, Belarus
-                    Dmitry "Dima" Korolev <dmitry.korolev@gmail.com>
-
+ 
+ Copyright (c) 2015:
+ 
+ * Dmitry "Dima" Korolev <dmitry.korolev@gmail.com>
+ * Alexander Zolotarev <me@alex.bio> from Minsk, Belarus
+ 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
-
+ 
  The above copyright notice and this permission notice shall be included in all
  copies or substantial portions of the Software.
-
+ 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,13 +25,13 @@
  SOFTWARE.
  *******************************************************************************/
 
-#ifndef ALOHALYTICS_OBJC_H
-#define ALOHALYTICS_OBJC_H
-
+#ifndef C5T_IOS_CLIENT_H
+#define C5T_IOS_CLIENT_H
+ 
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 
-@interface Alohalytics : NSObject
+@interface AlohalyticsLite : NSObject
 
 + (void)setDebugMode:(BOOL)enable;
 
@@ -37,9 +39,8 @@
 // or in application:willFinishLaunchingWithOptions:
 + (void)setup:(NSString *)serverUrl withLaunchOptions:(NSDictionary *)options;
 
-// Alternative to the previous setup method if you integrated Alohalytics after initial release
-// and don't want to count app upgrades as new installs (and definitely know that it's an already existing
-// user).
+// Alternative to the previous setup method when not using automatic detection 
+// of whether the application is being launched for the first time.
 + (void)setup:(NSString *)serverUrl andFirstLaunch:(BOOL)isFirstLaunch withLaunchOptions:(NSDictionary *)options;
 
 // Various logging methods.
@@ -54,4 +55,4 @@
 
 @end
 
-#endif  // #ifndef ALOHALYTICS_OBJC_H
+#endif  // C5T_IOS_CLIENT_H
