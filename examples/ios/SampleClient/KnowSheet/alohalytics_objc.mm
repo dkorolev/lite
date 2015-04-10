@@ -1,8 +1,9 @@
 /*******************************************************************************
  The MIT License (MIT)
  
- Copyright (c) 2015 Alexander Zolotarev <me@alex.bio> from Minsk, Belarus
- Dmitry "Dima" Korolev <dmitry.korolev@gmail.com>
+ Copyright (c) 2015
+ * Dmitry "Dima" Korolev <dmitry.korolev@gmail.com>
+ * Alexander Zolotarev <me@alex.bio> from Minsk, Belarus
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -47,41 +48,42 @@
 #import <Foundation/NSURL.h>
 #import <Foundation/NSURLRequest.h>
 
-#include <TargetConditionals.h>  // TARGET_OS_IPHONE
+#include <TargetConditionals.h>  // For `TARGET_OS_IPHONE`.
 #if (TARGET_OS_IPHONE > 0)
 // Works for all iOS devices, including iPad.
 #import <UIKit/UIDevice.h>
 #import <UIKit/UIScreen.h>
 #import <UIKit/UIApplication.h>
 #import <AdSupport/ASIdentifierManager.h>
-#endif  // TARGET_OS_IPHONE
+#endif  // (TARGET_OS_IPHONE > 0)
 
 // using namespace alohalytics;
 
 // namespace {
-// Conversion from [possible nil] NSString to std::string.
-static std::string ToStdString(NSString *nsString) {
+// Conversion from [possible nil] `NSString` to `std::string`.
+static std::string UnsafeToStdString(NSString *nsString) {
     if (nsString) {
         return std::string([nsString UTF8String]);
+    } else {
+        return std::string();
     }
-    return std::string();
 }
 
-// Additional check if object can be represented as a string.
-static std::string ToStdStringSafe(id object) {
+// Additional check if the object can be represented as a string.
+static std::string ToStdString(id object) {
     if ([object isKindOfClass:[NSString class]]) {
-        return ToStdString(object);
+        return UnsafeToStdString(object);
     } else if ([object isKindOfClass:[NSObject class]]) {
-        return ToStdString(((NSObject *)object).description);
+        return UnsafeToStdString(((NSObject *)object).description);
     }
-    return "ERROR: Trying to log neither NSString nor NSObject-inherited object.";
+    return "ERROR: `ToStdString()` is being provided with neither NSString nor NSObject-inherited object.";
 }
 
 // Safe conversion from [possible nil] NSDictionary.
 static std::map<std::string, std::string> ToStringMap(NSDictionary *nsDictionary) {
     std::map<std::string, std::string> map;
     for (NSString *key in nsDictionary) {
-        map[ToStdString(key)] = ToStdStringSafe([nsDictionary objectForKey:key]);
+        map[UnsafeToStdString(key)] = ToStdString([nsDictionary objectForKey:key]);
     }
     return map;
 }
@@ -92,10 +94,10 @@ static std::map<std::string, std::string> ToStringMap(NSArray *nsArray) {
     std::string key;
     for (id item in nsArray) {
         if (key.empty()) {
-            key = ToStdStringSafe(item);
+            key = ToStdString(item);
             map[key] = "";
         } else {
-            map[key] = ToStdStringSafe(item);
+            map[key] = ToStdString(item);
             key.clear();
         }
     }
@@ -138,17 +140,19 @@ static std::pair<std::string, bool> InstallationId() {
  
  NSURL * url = [options objectForKey:UIApplicationLaunchOptionsURLKey];
  if (url) {
- parsed.emplace("UIApplicationLaunchOptionsURLKey", ToStdString([url absoluteString]));
+ parsed.emplace("UIApplicationLaunchOptionsURLKey", UnsafeToStdString([url absoluteString]));
  }
  NSString * source = [options objectForKey:UIApplicationLaunchOptionsSourceApplicationKey];
  if (source) {
- parsed.emplace("UIApplicationLaunchOptionsSourceApplicationKey", ToStdString(source));
+ parsed.emplace("UIApplicationLaunchOptionsSourceApplicationKey", UnsafeToStdString(source));
  }
  return parsed;
  }
- #endif  // TARGET_OS_IPHONE
+ #endif  // (TARGET_OS_IPHONE > 0)
  */
 
+// TODO(dkorolev): This class should be moved away to a separate header file.
+// I just want to keep the things as compact as possible for now.
 class Location {
     enum Mask : uint8_t {
         NOT_INITIALIZED = 0,
@@ -162,20 +166,18 @@ class Location {
 public:
     class LocationDecodeException : public std::exception {};
     
-    // Milliseconds from January 1, 1970.
-    uint64_t timestamp_ms_;
-    double latitude_deg_;
+    uint64_t timestamp_ms_;  // Milliseconds from January 1, 1970.
+    double latitude_deg_;  // Positive degrees from the true North.
     double longitude_deg_;
     double horizontal_accuracy_m_;
     double altitude_m_;
     double vertical_accuracy_m_;
-    // Positive degrees from the true North.
     double bearing_deg_;
-    // Meters per second.
-    double speed_mps_;
+    double speed_mps_;  // Meters per second.
     
-    // We use degrees with precision of 7 decimal places - it's approx 2cm precision on Earth.
+    // Use degrees with precision of 7 decimal places - approximately 2cm on Earth.
     static constexpr double TEN_MILLION = 10000000.0;
+    
     // Some params below can be stored with 2 decimal places precision.
     static constexpr double ONE_HUNDRED = 100.0;
     
@@ -184,7 +186,8 @@ public:
         std::string s;
         s.push_back(valid_values_mask_);
         if (valid_values_mask_ & HAS_LATLON) {
-            static_assert(sizeof(timestamp_ms_) == 8, "We cut off timestamp from 8 bytes to 6 to save space.");
+            static_assert(sizeof(timestamp_ms_) == 8, "Must be uint64_t.");
+            // Crop the timestamp from 8 bytes to 6 to save space.
             AppendToStringAsBinary(s, timestamp_ms_, sizeof(timestamp_ms_) - 2);
             const int32_t lat10mil = latitude_deg_ * TEN_MILLION;
             AppendToStringAsBinary(s, lat10mil);
@@ -214,9 +217,9 @@ public:
     }
     
     // Initializes location from serialized byte array created by ToString() method.
-    explicit Location(const std::string &encoded) { Decode(encoded); }
+    explicit Location(const std::string& encoded) { Decode(encoded); }
     
-    void Decode(const std::string &encoded) {
+    void Decode(const std::string& encoded) {
         if (encoded.empty()) {
             throw LocationDecodeException();
         }
@@ -273,7 +276,7 @@ public:
     enum Source : std::uint8_t { UNKNOWN = 0, GPS = 1, NETWORK = 2, PASSIVE = 3 } source_;
     
     bool HasLatLon() const { return valid_values_mask_ & HAS_LATLON; }
-    Location &SetLatLon(uint64_t timestamp_ms,
+    Location& SetLatLon(uint64_t timestamp_ms,
                         double latitude_deg,
                         double longitude_deg,
                         double horizontal_accuracy_m) {
@@ -289,14 +292,14 @@ public:
     }
     
     bool HasSource() const { return valid_values_mask_ & HAS_SOURCE; }
-    Location &SetSource(Source source) {
+    Location& SetSource(Source source) {
         source_ = source;
         valid_values_mask_ = static_cast<Mask>(valid_values_mask_ | HAS_SOURCE);
         return *this;
     }
     
     bool HasAltitude() const { return valid_values_mask_ & HAS_ALTITUDE; }
-    Location &SetAltitude(double altitude_m, double vertical_accuracy_m) {
+    Location& SetAltitude(double altitude_m, double vertical_accuracy_m) {
         if (vertical_accuracy_m > 0.0) {
             altitude_m_ = altitude_m;
             vertical_accuracy_m_ = vertical_accuracy_m;
@@ -306,7 +309,7 @@ public:
     }
     
     bool HasBearing() const { return valid_values_mask_ & HAS_BEARING; }
-    Location &SetBearing(double bearing_deg) {
+    Location& SetBearing(double bearing_deg) {
         if (bearing_deg >= 0.0) {
             bearing_deg_ = bearing_deg;
             valid_values_mask_ = static_cast<Mask>(valid_values_mask_ | HAS_BEARING);
@@ -315,7 +318,7 @@ public:
     }
     
     bool HasSpeed() const { return valid_values_mask_ & HAS_SPEED; }
-    Location &SetSpeed(double speed_mps) {
+    Location& SetSpeed(double speed_mps) {
         if (speed_mps >= 0.0) {
             speed_mps_ = speed_mps;
             valid_values_mask_ = static_cast<Mask>(valid_values_mask_ | HAS_SPEED);
@@ -323,58 +326,61 @@ public:
         return *this;
     }
     
-    template <class Archive>
-    void save(Archive &ar) const {
+    // Production-ready JSON serialization using Cereal.
+    template <class A>
+    void save(A& ar) const {
         ar(Encode());
     }
     
-    template <class Archive>
-    void load(Archive &ar) {
+    template <class A>
+    void load(A& ar) {
         std::string encoded_location;
         ar(encoded_location);
         Decode(encoded_location);
     }
     
+    // Development-friendly serialization for debugging purposes.
     std::string ToDebugString() const {
-        std::ostringstream stream;
-        stream << '<' << std::fixed;
+        std::ostringstream s;
+        s << '<' << std::fixed;
         if (valid_values_mask_ & HAS_LATLON) {
-            stream << "utc=" << timestamp_ms_ << ",lat=" << std::setprecision(7) << latitude_deg_
+            s << "utc=" << timestamp_ms_ << ",lat=" << std::setprecision(7) << latitude_deg_
             << ",lon=" << std::setprecision(7) << longitude_deg_ << ",acc=" << std::setprecision(2)
             << horizontal_accuracy_m_;
         }
         if (valid_values_mask_ & HAS_ALTITUDE) {
-            stream << ",alt=" << std::setprecision(2) << altitude_m_ << ",vac=" << std::setprecision(2)
+            s << ",alt=" << std::setprecision(2) << altitude_m_ << ",vac=" << std::setprecision(2)
             << vertical_accuracy_m_;
         }
         if (valid_values_mask_ & HAS_BEARING) {
-            stream << ",bea=" << std::setprecision(7) << bearing_deg_;
+            s << ",bea=" << std::setprecision(7) << bearing_deg_;
         }
         if (valid_values_mask_ & HAS_SPEED) {
-            stream << ",spd=" << std::setprecision(2) << speed_mps_;
+            s << ",spd=" << std::setprecision(2) << speed_mps_;
         }
         if (valid_values_mask_ & HAS_SOURCE) {
-            stream << ",src=";
+            s << ",src=";
             switch (source_) {
                 case Source::GPS:
-                    stream << "GPS";
+                    s << "GPS";
                     break;
                 case Source::NETWORK:
-                    stream << "Net";
+                    s << "Net";
                     break;
                 case Source::PASSIVE:
-                    stream << "Psv";
+                    s << "Psv";
                     break;
                 default:
-                    stream << "Unk";
+                    s << "Unk";
                     break;
             }
         }
-        stream << '>';
-        return stream.str();
+        s << '>';
+        return s.str();
     }
     
 private:
+    // Internal, for serialization.
     template <typename T>
     static inline void AppendToStringAsBinary(std::string &str, const T &value, size_t bytes = sizeof(T)) {
         str.append(reinterpret_cast<const char *>(&value), bytes);
@@ -417,7 +423,7 @@ static std::string RectToString(CGRect const &rect) {
     std::to_string(static_cast<int>(rect.size.width)) + " " +
     std::to_string(static_cast<int>(rect.size.height));
 }
-#endif
+#endif  // (TARGET_OS_IPHONE > 0)
 
 struct AsStringImpl {
     static std::string Invoke(const std::string& s) {
@@ -461,32 +467,24 @@ namespace consumer {
                 ::NSLog(@"LogEvent HTTP: %s", message.c_str());
                 
                 const std::string url = "http://localhost:8686/log";
-                const std::string body = message;
                 
                 // This is Xcode's "neat" indentation format. Don't ask me WTF it is. -- @dkorolev
-                NSMutableURLRequest * request =
+                NSMutableURLRequest * req =
                 [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
-                 // TODO(dkorolev): Add this line. I can't deal with its syntax.                                      cachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
+                // TODO(dkorolev): Add this line. I can't deal with its syntax. Objective-C is killing me.                                      cachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
                 
-                    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-                
-//                if (!user_agent.empty()) {
-  //                  [request setValue:[NSString stringWithUTF8String:user_agent.c_str()] forHTTPHeaderField:@"User-Agent"];
-                //}
-                
-                //if (!method.empty()) {
-                  //  request.HTTPMethod = [NSString stringWithUTF8String:method.c_str()];
-                //}
-                                                  
-                                                  request.HTTPMethod = @"POST";
-                
-                    request.HTTPBody = [NSData dataWithBytes:body.data() length:body.length()];
-                
-                NSHTTPURLResponse * response = nil;
+                req.HTTPMethod = @"POST";
+                req.HTTPBody = [NSData dataWithBytes:message.data() length:message.length()];
+                [req setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+                NSHTTPURLResponse * res = nil;
                 NSError * err = nil;
-                NSData * url_data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&err];
+                NSData * url_data = [NSURLConnection sendSynchronousRequest:req returningResponse:&res error:&err];
+                
+                // TODO(dkorolev): A bit more detailed error handling.
+                // TODO(dkorolev): If the message queue is persistent, consider keeping unsent entries there.
                 static_cast<void>(url_data);
-                if (!response) {
+                if (!res) {
                     ::NSLog(@"HTTP fail.");
                 } else {
                     ::NSLog(@"HTTP OK.");
@@ -496,7 +494,10 @@ namespace consumer {
         };
     }
     
-    // The simplest possible implementation of wrapping calls from multiple sources into a single processor thread.
+    // A straightforward implementation for wrapping
+    // calls from multiple sources into a single thread, preserving the order.
+    // NOTE: In production, a more advanced implementation is normally used,
+    // with more efficient in-memory message queue and with optionally persistent storage of events.
     template<class T_SINGLE_THREADED_IMPL> class SimplestThreadSafeWrapper final {
     public:
         SimplestThreadSafeWrapper() : up_(true), thread_(&SimplestThreadSafeWrapper::Thread, this) {
@@ -525,6 +526,7 @@ namespace consumer {
                 {
                     std::unique_lock<std::mutex> lock(mutex_);
                     if (!up_) {
+                        // Terminating.
                         return;
                     }
                     if (queue_.empty()) {
@@ -610,20 +612,20 @@ static void LogSystemInformation() {
     }
     // alohalytics::
     std::map<std::string, std::string> info = {
-        {"deviceName", ToStdString(device.name)},
-        {"deviceSystemName", ToStdString(device.systemName)},
-        {"deviceSystemVersion", ToStdString(device.systemVersion)},
-        {"deviceModel", ToStdString(device.model)},
+        {"deviceName", UnsafeToStdString(device.name)},
+        {"deviceSystemName", UnsafeToStdString(device.systemName)},
+        {"deviceSystemVersion", UnsafeToStdString(device.systemVersion)},
+        {"deviceModel", UnsafeToStdString(device.model)},
         {"deviceUserInterfaceIdiom", userInterfaceIdiom},
         {"screens", std::to_string([UIScreen screens].count)},
         {"screenBounds", RectToString(screen.bounds)},
         {"screenScale", std::to_string(screen.scale)},
         {"preferredLanguages", preferredLanguages},
         {"preferredLocalizations", preferredLocalizations},
-        {"localeIdentifier", ToStdString([locale objectForKey:NSLocaleIdentifier])},
-        {"calendarIdentifier", ToStdString([[locale objectForKey:NSLocaleCalendar] calendarIdentifier])},
-        {"localeMeasurementSystem", ToStdString([locale objectForKey:NSLocaleMeasurementSystem])},
-        {"localeDecimalSeparator", ToStdString([locale objectForKey:NSLocaleDecimalSeparator])},
+        {"localeIdentifier", UnsafeToStdString([locale objectForKey:NSLocaleIdentifier])},
+        {"calendarIdentifier", UnsafeToStdString([[locale objectForKey:NSLocaleCalendar] calendarIdentifier])},
+        {"localeMeasurementSystem", UnsafeToStdString([locale objectForKey:NSLocaleMeasurementSystem])},
+        {"localeDecimalSeparator", UnsafeToStdString([locale objectForKey:NSLocaleDecimalSeparator])},
     };
     if (device.systemVersion.floatValue >= 8.0) {
         info.emplace("screenNativeBounds", RectToString(screen.nativeBounds));
@@ -635,13 +637,13 @@ static void LogSystemInformation() {
     info.clear();
     if (device.systemVersion.floatValue >= 6.0) {
         if (device.identifierForVendor) {
-            info.emplace("identifierForVendor", ToStdString(device.identifierForVendor.UUIDString));
+            info.emplace("identifierForVendor", UnsafeToStdString(device.identifierForVendor.UUIDString));
         }
         if (NSClassFromString(@"ASIdentifierManager")) {
             ASIdentifierManager *manager = [ASIdentifierManager sharedManager];
             info.emplace("isAdvertisingTrackingEnabled", manager.isAdvertisingTrackingEnabled ? "YES" : "NO");
             if (manager.advertisingIdentifier) {
-                info.emplace("advertisingIdentifier", ToStdString(manager.advertisingIdentifier.UUIDString));
+                info.emplace("advertisingIdentifier", UnsafeToStdString(manager.advertisingIdentifier.UUIDString));
             }
         }
     }
@@ -649,7 +651,7 @@ static void LogSystemInformation() {
         instance.LogEvent("$iosDeviceIds", info);
     }
 }
-#endif  // TARGET_OS_IPHONE
+#endif  // (TARGET_OS_IPHONE > 0)
 
 + (void)setDebugMode:(BOOL)enable {
     Stats::Instance().SetDebugMode(enable);
@@ -703,14 +705,14 @@ withLaunchOptions:(NSDictionary *)options {
      [userDataBase synchronize];
      #if (TARGET_OS_IPHONE > 0)
      LogSystemInformation();
-     #endif  // TARGET_OS_IPHONE
+     #endif  // (TARGET_OS_IPHONE > 0)
      forceUpload = true;
      }
      }
      instance.LogEvent("$launch"
      #if (TARGET_OS_IPHONE > 0)
      , ParseLaunchOptions(options)
-     #endif  // TARGET_OS_IPHONE
+     #endif  // (TARGET_OS_IPHONE > 0)
      );
      // Force uploading to get first-time install information before uninstall.
      if (forceUpload) {
@@ -720,35 +722,35 @@ withLaunchOptions:(NSDictionary *)options {
 }
 
 + (void)logEvent:(NSString *)event {
-    Stats::Instance().LogEvent(ToStdString(event));
+    Stats::Instance().LogEvent(UnsafeToStdString(event));
 }
 
 + (void)logEvent:(NSString *)event atLocation:(CLLocation *)location {
-    Stats::Instance().LogEvent(ToStdString(event), ExtractLocation(location));
+    Stats::Instance().LogEvent(UnsafeToStdString(event), ExtractLocation(location));
 }
 
 + (void)logEvent:(NSString *)event withValue:(NSString *)value {
-    Stats::Instance().LogEvent(ToStdString(event), ToStdString(value));
+    Stats::Instance().LogEvent(UnsafeToStdString(event), UnsafeToStdString(value));
 }
 
 + (void)logEvent:(NSString *)event withValue:(NSString *)value atLocation:(CLLocation *)location {
-    Stats::Instance().LogEvent(ToStdString(event), ToStdString(value), ExtractLocation(location));
+    Stats::Instance().LogEvent(UnsafeToStdString(event), UnsafeToStdString(value), ExtractLocation(location));
 }
 
 + (void)logEvent:(NSString *)event withKeyValueArray:(NSArray *)array {
-    Stats::Instance().LogEvent(ToStdString(event), ToStringMap(array));
+    Stats::Instance().LogEvent(UnsafeToStdString(event), ToStringMap(array));
 }
 
 + (void)logEvent:(NSString *)event withKeyValueArray:(NSArray *)array atLocation:(CLLocation *)location {
-    Stats::Instance().LogEvent(ToStdString(event), ToStringMap(array), ExtractLocation(location));
+    Stats::Instance().LogEvent(UnsafeToStdString(event), ToStringMap(array), ExtractLocation(location));
 }
 
 + (void)logEvent:(NSString *)event withDictionary:(NSDictionary *)dictionary {
-    Stats::Instance().LogEvent(ToStdString(event), ToStringMap(dictionary));
+    Stats::Instance().LogEvent(UnsafeToStdString(event), ToStringMap(dictionary));
 }
 
 + (void)logEvent:(NSString *)event withDictionary:(NSDictionary *)dictionary atLocation:(CLLocation *)location {
-    Stats::Instance().LogEvent(ToStdString(event), ToStringMap(dictionary), ExtractLocation(location));
+    Stats::Instance().LogEvent(UnsafeToStdString(event), ToStringMap(dictionary), ExtractLocation(location));
 }
 
 @end
