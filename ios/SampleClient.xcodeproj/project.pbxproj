@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3226891C1AD868CC003B06C0 /* ios_client.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3226891B1AD868CC003B06C0 /* ios_client.mm */; };
+		32A1E54F1ADF00C00094AE54 /* Midichlorians.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32A1E54E1ADF00C00094AE54 /* Midichlorians.mm */; };
 		6BD1AAFD1A8E5AD8000CB093 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6BD1AAFC1A8E5AD8000CB093 /* libz.dylib */; };
 		6BDB7FDC1AA4884B0036C3CB /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6BDB7FDB1AA4884B0036C3CB /* AdSupport.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		6BDEF0571A3CF2D100054FAC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BDEF0561A3CF2D100054FAC /* main.m */; };
@@ -19,9 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3226891A1AD868CC003B06C0 /* ios_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ios_client.h; sourceTree = "<group>"; };
-		3226891B1AD868CC003B06C0 /* ios_client.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ios_client.mm; sourceTree = "<group>"; };
-		32B438E91AD88039009C3910 /* ios_location.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ios_location.h; sourceTree = "<group>"; };
+		32A1E54D1ADF00C00094AE54 /* Midichlorians.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Midichlorians.h; path = Current/Midichlorians.h; sourceTree = "<group>"; };
+		32A1E54E1ADF00C00094AE54 /* Midichlorians.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Midichlorians.mm; path = Current/Midichlorians.mm; sourceTree = "<group>"; };
 		6BD1AAE71A8E53EC000CB093 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/Main.storyboard; sourceTree = "<group>"; };
 		6BD1AAFB1A8E5ABE000CB093 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		6BD1AAFC1A8E5AD8000CB093 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -49,16 +48,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		322689191AD868CC003B06C0 /* C5T */ = {
-			isa = PBXGroup;
-			children = (
-				32B438E91AD88039009C3910 /* ios_location.h */,
-				3226891A1AD868CC003B06C0 /* ios_client.h */,
-				3226891B1AD868CC003B06C0 /* ios_client.mm */,
-			);
-			path = C5T;
-			sourceTree = "<group>";
-		};
 		6BDEF0481A3CF2D100054FAC = {
 			isa = PBXGroup;
 			children = (
@@ -78,7 +67,8 @@
 		6BDEF0531A3CF2D100054FAC /* SampleClient */ = {
 			isa = PBXGroup;
 			children = (
-				322689191AD868CC003B06C0 /* C5T */,
+				32A1E54D1ADF00C00094AE54 /* Midichlorians.h */,
+				32A1E54E1ADF00C00094AE54 /* Midichlorians.mm */,
 				6BDEF0581A3CF2D100054FAC /* AppDelegate.h */,
 				6BDEF0591A3CF2D100054FAC /* AppDelegate.m */,
 				6BDEF05B1A3CF2D100054FAC /* ViewController.h */,
@@ -173,7 +163,7 @@
 			files = (
 				6BDEF05D1A3CF2D100054FAC /* ViewController.m in Sources */,
 				6BDEF05A1A3CF2D100054FAC /* AppDelegate.m in Sources */,
-				3226891C1AD868CC003B06C0 /* ios_client.mm in Sources */,
+				32A1E54F1ADF00C00094AE54 /* Midichlorians.mm in Sources */,
 				6BDEF0571A3CF2D100054FAC /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

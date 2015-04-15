@@ -24,7 +24,7 @@
 
 #import "ViewController.h"
 
-#import "C5T/ios_client.h"
+#import "Current/Midichlorians.h"
 
 @interface ViewController ()
 
@@ -34,12 +34,12 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [AlohalyticsLite logEvent:@"ViewControllerDidLoad" withDictionary:[NSBundle mainBundle].infoDictionary ];
+  [Midichlorians logEvent:@"ViewControllerDidLoad" withDictionary:[NSBundle mainBundle].infoDictionary ];
 }
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];
-  [AlohalyticsLite logEvent:@"didReceiveMemoryWarning"];
+  [Midichlorians logEvent:@"didReceiveMemoryWarning"];
 }
 
 @end
