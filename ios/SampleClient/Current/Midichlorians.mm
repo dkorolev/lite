@@ -121,10 +121,8 @@ class POSTviaHTTP {
     if (!server_url_.empty()) {
       ::NSLog(@"LogEvent HTTP: `%s`", message.c_str());
 
-      const std::string url = "http://localhost:8686/log";
-
       NSMutableURLRequest *req = [NSMutableURLRequest
-          requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
+          requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:server_url_.c_str()]]];
       // TODO(dkorolev): Add this line. I can't deal with its syntax. Objective-C is killing me.
       // cachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
 
