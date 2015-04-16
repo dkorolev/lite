@@ -320,7 +320,7 @@ using namespace midichlorians;
 
 + (void)emit:(const MidichloriansEvent &)event {
   Stats &instance = Singleton<Stats>::Instance();
-  instance.OnMessage(event.EventAsString(instance.GetDeviceId()));  // UnsafeToStdString(event));
+  instance.OnMessage(event.EventAsString(instance.GetDeviceId()));
 }
 
 @end
