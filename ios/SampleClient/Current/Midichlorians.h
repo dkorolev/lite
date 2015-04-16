@@ -92,15 +92,16 @@ CURRENT_EVENT(iOSEvent, MidichloriansEvent) {
 };
 
 CURRENT_EVENT(iOSAppLaunchEvent, iOSEvent) {
+    std::string binary_version;
     std::string cf_version;
     uint64_t app_install_time;
     uint64_t app_update_time;
     template<typename A> void serialize(A& ar) {
         SUPER::serialize(ar);
-        ar(CEREAL_NVP(cf_version), CEREAL_NVP(app_install_time), CEREAL_NVP(app_update_time));
+        ar(CEREAL_NVP(binary_version), CEREAL_NVP(cf_version), CEREAL_NVP(app_install_time), CEREAL_NVP(app_update_time));
     }
     iOSAppLaunchEvent() = default;
-    iOSAppLaunchEvent(const std::string& cf_version, uint64_t app_install_time, uint64_t app_update_time) : cf_version(cf_version), app_install_time(app_install_time), app_update_time(app_update_time) {
+    iOSAppLaunchEvent(const std::string& cf_version, uint64_t app_install_time, uint64_t app_update_time) : binary_version(__DATE__ " " __TIME__), cf_version(cf_version), app_install_time(app_install_time), app_update_time(app_update_time) {
         description = "*FinishLaunchingWithOptions";
     }
 };
