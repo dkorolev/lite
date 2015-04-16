@@ -24,7 +24,7 @@
 
 #import "ViewController.h"
 
-#import "Current/Midichlorians.h"
+#import "data_dictionary.h"
 
 @interface ViewController ()
 
@@ -34,12 +34,12 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  // [Midichlorians logEvent:@"ViewControllerDidLoad" withDictionary:[NSBundle mainBundle].infoDictionary ];
+  [Midichlorians emit:iOSEvent("viewDidLoad")];
 }
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];
-  // [Midichlorians logEvent:@"didReceiveMemoryWarning"];
+  [Midichlorians emit:iOSEvent("didReceiveMemoryWarning")];
 }
 
 @end

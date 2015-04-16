@@ -29,16 +29,6 @@ SOFTWARE.
 
 #include "Current/Midichlorians.h"
 
-CURRENT_EVENT(iOSFocusEvent, MidichloriansEvent) {
-    bool activated;
-    std::string description;
-    template<typename A> void serialize(A& ar) {
-        ar(CEREAL_NVP(activated), CEREAL_NVP(description));
-    }
-    iOSFocusEvent() = default;
-    iOSFocusEvent(bool activated, const std::string& description) : activated(activated), description(description) {}
-};
-
 // typedef std::tuple<EventWillResignActive, EventDidEnterBackground> EVENTS_TYPE_LIST;
 
 #endif  // DATA_DICTIONARY_H

@@ -30,14 +30,12 @@
 #include "data_dictionary.h"
 
 @interface AppDelegate ()
-
 @end
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  [Midichlorians setup:@"http://localhost:8080/" withLaunchOptions:launchOptions];
+  [Midichlorians setup:@"http://localhost:8686/log" withLaunchOptions:launchOptions];
   return YES;
 }
 

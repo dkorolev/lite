@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		32A1E54F1ADF00C00094AE54 /* Midichlorians.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32A1E54E1ADF00C00094AE54 /* Midichlorians.mm */; };
+		325EAE431ADFA18500750D6B /* Midichlorians.mm in Sources */ = {isa = PBXBuildFile; fileRef = 325EAE421ADFA18500750D6B /* Midichlorians.mm */; };
 		32D226D71ADF999600D35847 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32D226D61ADF999600D35847 /* ViewController.mm */; };
 		32E5E5671ADF196B0092B25C /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32E5E5661ADF196B0092B25C /* AppDelegate.mm */; };
 		6BD1AAFD1A8E5AD8000CB093 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6BD1AAFC1A8E5AD8000CB093 /* libz.dylib */; };
@@ -19,8 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		32A1E54D1ADF00C00094AE54 /* Midichlorians.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Midichlorians.h; path = Current/Midichlorians.h; sourceTree = "<group>"; };
-		32A1E54E1ADF00C00094AE54 /* Midichlorians.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Midichlorians.mm; path = Current/Midichlorians.mm; sourceTree = "<group>"; };
+		325EAE411ADFA18500750D6B /* Midichlorians.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Midichlorians.h; path = Current/Midichlorians.h; sourceTree = "<group>"; };
+		325EAE421ADFA18500750D6B /* Midichlorians.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Midichlorians.mm; path = Current/Midichlorians.mm; sourceTree = "<group>"; };
 		32D226D61ADF999600D35847 /* ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
 		32E5E5651ADF18610092B25C /* data_dictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = data_dictionary.h; sourceTree = "<group>"; };
 		32E5E5661ADF196B0092B25C /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
@@ -68,11 +68,11 @@
 		6BDEF0531A3CF2D100054FAC /* SampleClient */ = {
 			isa = PBXGroup;
 			children = (
+				325EAE411ADFA18500750D6B /* Midichlorians.h */,
+				325EAE421ADFA18500750D6B /* Midichlorians.mm */,
 				32D226D61ADF999600D35847 /* ViewController.mm */,
 				32E5E5661ADF196B0092B25C /* AppDelegate.mm */,
 				32E5E5651ADF18610092B25C /* data_dictionary.h */,
-				32A1E54D1ADF00C00094AE54 /* Midichlorians.h */,
-				32A1E54E1ADF00C00094AE54 /* Midichlorians.mm */,
 				6BDEF0581A3CF2D100054FAC /* AppDelegate.h */,
 				6BDEF05B1A3CF2D100054FAC /* ViewController.h */,
 				6BDEF05E1A3CF2D100054FAC /* Main.storyboard */,
@@ -164,8 +164,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				32D226D71ADF999600D35847 /* ViewController.mm in Sources */,
-				32A1E54F1ADF00C00094AE54 /* Midichlorians.mm in Sources */,
 				32E5E5671ADF196B0092B25C /* AppDelegate.mm in Sources */,
+				325EAE431ADFA18500750D6B /* Midichlorians.mm in Sources */,
 				6BDEF0571A3CF2D100054FAC /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

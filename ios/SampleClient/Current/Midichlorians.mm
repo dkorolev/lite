@@ -56,6 +56,7 @@
 
 namespace midichlorians {
 
+    /*
 // Conversion from [possible nil] `NSString` to `std::string`.
 static std::string UnsafeToStdString(NSString *nsString) {
     if (nsString) {
@@ -99,39 +100,42 @@ static std::map<std::string, std::string> ToStringMap(NSArray *nsArray) {
     }
     return map;
 }
+     */
 
     /*
 
+     */
 // Returns a string representing uint64_t timestamp of given file or directory.
 // Uses modification date in Unix epoch milliseconds, if available.
-static std::string PathTimestampMillis(NSString *path) {
+static uint64_t PathTimestampMillis(NSString *path) {
     NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil];
     if (attributes) {
         NSDate *date = [attributes objectForKey:NSFileModificationDate];
-        return std::to_string(static_cast<uint64_t>([date timeIntervalSince1970] * 1000.0));
+        return static_cast<uint64_t>([date timeIntervalSince1970] * 1000);
+    } else {
+        return 0ull;
     }
-    return std::string("0");
 }
+    
 
 // Returns <unique id, true if it's the very-first app launch>.
 static std::pair<std::string, bool> InstallationId() {
+    const auto key = @"MidichloriansInstallationId";
     bool firstLaunch = false;
     NSUserDefaults *userDataBase = [NSUserDefaults standardUserDefaults];
-    NSString *installationId = [userDataBase objectForKey:@"AlohalyticsInstallationId"];
+    NSString *installationId = [userDataBase objectForKey:key];
     if (installationId == nil) {
         CFUUIDRef uuid = CFUUIDCreate(kCFAllocatorDefault);
-        // All iOS IDs start with I:
-        installationId = [@"I:"
+        installationId = [@"iOS:"
                           stringByAppendingString:(NSString *)CFBridgingRelease(CFUUIDCreateString(kCFAllocatorDefault, uuid))];
         CFRelease(uuid);
-        [userDataBase setValue:installationId forKey:@"AlohalyticsInstallationId"];
+        [userDataBase setValue:installationId forKey:key];
         [userDataBase synchronize];
         firstLaunch = true;
     }
     return std::make_pair([installationId UTF8String], firstLaunch);
 }
-*/
-    
+
 /*
  #if (TARGET_OS_IPHONE > 0)
  static std::map<std::string, std::string> ParseLaunchOptions(NSDictionary * options) {
@@ -162,6 +166,7 @@ static std::string RectToString(CGRect const &rect) {
 
      */
     
+    /*
 struct AsStringImpl {
     static std::string Invoke(const std::string& s) {
         return s;
@@ -184,47 +189,66 @@ struct AsStringImpl {
 template<typename T> std::string AsString(T&& s) {
     return AsStringImpl::Invoke(s);
 }
+     */
 
 namespace consumer {
     
     namespace thread_unsafe {
-        class NSLog final {
+        class NSLog {
         public:
             void OnMessage(const std::string& message) {
                 ::NSLog(@"LogEvent: %s", message.c_str());
             }
         };
         
-        class POSTviaHTTP final {
+        class POSTviaHTTP {
         public:
-            void OnMessage(const std::string& message) {
-                ::NSLog(@"LogEvent HTTP: %s", message.c_str());
-                
-                const std::string url = "http://localhost:8686/log";
-                
-                // This is Xcode's "neat" indentation format. Don't ask me WTF it is. -- @dkorolev
-                NSMutableURLRequest * req =
-                [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
-                // TODO(dkorolev): Add this line. I can't deal with its syntax. Objective-C is killing me.                                      cachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
-                
-                req.HTTPMethod = @"POST";
-                req.HTTPBody = [NSData dataWithBytes:message.data() length:message.length()];
-                [req setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-
-                NSHTTPURLResponse * res = nil;
-                NSError * err = nil;
-                NSData * url_data = [NSURLConnection sendSynchronousRequest:req returningResponse:&res error:&err];
-                
-                // TODO(dkorolev): A bit more detailed error handling.
-                // TODO(dkorolev): If the message queue is persistent, consider keeping unsent entries there.
-                static_cast<void>(url_data);
-                if (!res) {
-                    ::NSLog(@"HTTP fail.");
-                } else {
-                    ::NSLog(@"HTTP OK.");
-                }
-                
+            void SetServerUrl(const std::string& server_url) {
+                server_url_ = server_url;
             }
+            
+            void SetDeviceId(const std::string& device_id) {
+                device_id_ = device_id;
+            }
+            
+            const std::string& GetDeviceId() const {
+                return device_id_;
+            }
+            
+            void OnMessage(const std::string& message) {
+                if (!server_url_.empty()) {
+                    ::NSLog(@"LogEvent HTTP: `%s`", message.c_str());
+                    
+                    const std::string url = "http://localhost:8686/log";
+                    
+                    // This is Xcode's "neat" indentation format. Don't ask me WTF it is. -- @dkorolev
+                    NSMutableURLRequest * req =
+                    [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
+                    // TODO(dkorolev): Add this line. I can't deal with its syntax. Objective-C is killing me.                                      cachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
+                    
+                    req.HTTPMethod = @"POST";
+                    req.HTTPBody = [NSData dataWithBytes:message.data() length:message.length()];
+                    [req setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+                    
+                    NSHTTPURLResponse * res = nil;
+                    NSError * err = nil;
+                    NSData * url_data = [NSURLConnection sendSynchronousRequest:req returningResponse:&res error:&err];
+                    
+                    // TODO(dkorolev): A bit more detailed error handling.
+                    // TODO(dkorolev): If the message queue is persistent, consider keeping unsent entries within it.
+                    static_cast<void>(url_data);
+                    if (!res) {
+                        ::NSLog(@"LogEvent HTTP: Fail.");
+                    } else {
+                        ::NSLog(@"LogEvent HTTP: OK.");
+                    }
+                } else {
+                    ::NSLog(@"LogEvent HTTP: No `server_url_` set.");
+                }
+            }
+        private:
+            std::string server_url_;
+            std::string device_id_;
         };
     }
     
@@ -232,7 +256,7 @@ namespace consumer {
     // calls from multiple sources into a single thread, preserving the order.
     // NOTE: In production, a more advanced implementation is normally used,
     // with more efficient in-memory message queue and with optionally persistent storage of events.
-    template<class T_SINGLE_THREADED_IMPL> class SimplestThreadSafeWrapper final {
+    template<class T_SINGLE_THREADED_IMPL> class SimplestThreadSafeWrapper : public T_SINGLE_THREADED_IMPL {
     public:
         SimplestThreadSafeWrapper() : up_(true), thread_(&SimplestThreadSafeWrapper::Thread, this) {
         }
@@ -272,11 +296,9 @@ namespace consumer {
                     }
                 }
                 // Mutex-free section: Process this message.
-                impl_.OnMessage(message);
+                T_SINGLE_THREADED_IMPL::OnMessage(message);
             }
         }
-        
-        T_SINGLE_THREADED_IMPL impl_;
         
         std::atomic_bool up_;
         std::deque<std::string> queue_;
@@ -292,34 +314,14 @@ namespace consumer {
     
 }  // namespace consumer
 
-template<class T_CONSUMER> class StatsImpl {
-public:
-    static StatsImpl &Instance() {
-        static StatsImpl stats;
-        return stats;
-    }
-    
-    void InternalLogEvent(const std::string& message) {
-        impl_.OnMessage(message);
-    }
-    
-    template<typename P1> void LogEvent(P1&& p1) {
-        InternalLogEvent(AsString(std::forward<P1>(p1)));
-    }
-    
-    template<typename P1, typename P2> void LogEvent(P1&& p1, P2&& p2) {
-        InternalLogEvent(AsString(std::forward<P1>(p1)) + '\t' + AsString(std::forward<P2>(p2)));
-    }
-    
-    template<typename P1, typename P2, typename P3> void LogEvent(P1&& p1, P2&& p2, P3&& p3) {
-        InternalLogEvent(AsString(std::forward<P1>(p1)) + '\t' + AsString(std::forward<P2>(p2)) + '\t' + AsString(std::forward<P3>(p3)));
-    }
-    
-private:
-    T_CONSUMER impl_;
-};
+    template<typename T> struct Singleton {
+        static T& Instance() {
+            static T instance;
+            return instance;
+        }
+    };
 
-using Stats = StatsImpl<consumer::POSTviaHTTP>;
+    using Stats = consumer::POSTviaHTTP;
 
     /*
 #if (TARGET_OS_IPHONE > 0)
@@ -393,33 +395,38 @@ static void LogSystemInformation() {
 using namespace midichlorians;
 
 + (void)setup:(NSString *)serverUrl withLaunchOptions:(NSDictionary *)options {
-    [Midichlorians setup:serverUrl andFirstLaunch:YES withLaunchOptions:options];
-}
+    const auto installationId = InstallationId();
 
-+ (void)setup:(NSString *)serverUrl
-andFirstLaunch:(BOOL)isFirstLaunch
-withLaunchOptions:(NSDictionary *)options {
-    // TODO(dkorolev): InstallationId and SystemInformation.
-    /*
-     /// const auto installationId = InstallationId();
-     /// Stats & instance = Stats::Instance();
-     ///instance.SetClientId(installationId.first)
-     ///   .SetServerUrl([serverUrl UTF8String])
-     ///        .SetStoragePath(StoragePath());
-     
+    Stats& instance = Singleton<Stats>::Instance();
+    
+    instance.SetServerUrl([serverUrl UTF8String]);
+    instance.SetDeviceId(installationId.first);
+    
      // Calculate some basic statistics about installations/updates/launches.
-     NSUserDefaults * userDataBase = [NSUserDefaults standardUserDefaults];
-     NSString * installedVersion = [userDataBase objectForKey:@"AlohalyticsInstalledVersion"];
-     bool forceUpload = false;
-     if (installationId.second && isFirstLaunch && installedVersion == nil) {
-     NSString * version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-     // Documents folder modification time can be interpreted as a "first app launch time" or an approx. "app
-     install time".
-     // App bundle modification time can be interpreted as an "app update time".
+  //   NSUserDefaults * userDataBase = [NSUserDefaults standardUserDefaults];
+    
+    
+    /*
+    // Documents folder modification time can be interpreted as "app install time".
+     // App bundle modification time can be interpreted as "app update time".
+         
      instance.LogEvent("$install", {{"CFBundleShortVersionString", [version UTF8String]},
      {"documentsTimestampMillis", PathTimestampMillis([NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
      NSUserDomainMask, YES) firstObject])},
      {"bundleTimestampMillis", PathTimestampMillis([[NSBundle mainBundle] executablePath])}});
+         */
+    
+    if (installationId.second) {
+        [Midichlorians emit:iOSEvent("firstLaunch")];
+    }
+    
+    [Midichlorians emit:iOSAppLaunchEvent([[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"] UTF8String],
+                                          PathTimestampMillis([NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                                                                                                NSUserDomainMask, YES) firstObject]),
+                                          PathTimestampMillis([[NSBundle mainBundle] executablePath]))
+                                          ];
+    
+         /*
      [userDataBase setValue:version forKey:@"AlohalyticsInstalledVersion"];
      [userDataBase synchronize];
      #if (TARGET_OS_IPHONE > 0)
@@ -456,24 +463,9 @@ withLaunchOptions:(NSDictionary *)options {
      */
 }
 
-+ (void)logEvent:(NSString *)event {
-    Stats::Instance().LogEvent(UnsafeToStdString(event));
-}
-
-+ (void)logEvent:(NSString *)event withValue:(NSString *)value {
-    Stats::Instance().LogEvent(UnsafeToStdString(event), UnsafeToStdString(value));
-}
-
-+ (void)logEvent:(NSString *)event withKeyValueArray:(NSArray *)array {
-    Stats::Instance().LogEvent(UnsafeToStdString(event), ToStringMap(array));
-}
-
-+ (void)logEvent:(NSString *)event withDictionary:(NSDictionary *)dictionary {
-    Stats::Instance().LogEvent(UnsafeToStdString(event), ToStringMap(dictionary));
-}
-
 + (void)emit:(const MidichloriansEvent &)event {
-    Stats::Instance().LogEvent(event.EventAsString());  // UnsafeToStdString(event));
+    Stats& instance = Singleton<Stats>::Instance();
+    instance.OnMessage(event.EventAsString(instance.GetDeviceId()));  // UnsafeToStdString(event));
 }
 
 @end

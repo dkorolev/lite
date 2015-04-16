@@ -40,11 +40,19 @@
 #include "../../../Bricks/cerealize/cerealize.h"
 
 struct MidichloriansEvent {
+    mutable std::string device_id;
+    void SetDeviceId(const std::string& did) const {
+        device_id = did;
+    }
+    
     template <class A>
     void serialize(A& ar) {
+        ar(CEREAL_NVP(device_id));
     }
-    virtual std::string EventAsString() const {
-        return "<UNDEFINED EVENT>";
+    
+    virtual std::string EventAsString(const std::string& device_id) const {
+        SetDeviceId(device_id);
+        return JSON(WithBaseType<MidichloriansEvent>(*this));
     }
 };
 
@@ -57,10 +65,11 @@ struct MidichloriansEvent {
 #define CURRENT_EVENT(M_EVENT_CLASS_NAME, M_IMMEDIATE_BASE)         \
 struct M_EVENT_CLASS_NAME;                                  \
 CEREAL_REGISTER_TYPE(M_EVENT_CLASS_NAME);                   \
-struct M_EVENT_CLASS_NAME##Helper : MidichloriansEvent {    \
+struct M_EVENT_CLASS_NAME##Helper : M_IMMEDIATE_BASE {    \
 typedef MidichloriansEvent CEREAL_BASE_TYPE;              \
 typedef M_IMMEDIATE_BASE SUPER;                           \
-virtual std::string EventAsString() const override {      \
+virtual std::string EventAsString(const std::string& device_id) const override {      \
+SetDeviceId(device_id); \
 return JSON(WithBaseType<MidichloriansEvent>(*this));   \
 }                                                         \
 template <class A>                                        \
@@ -70,6 +79,44 @@ SUPER::serialize(ar);                                   \
 };                                                          \
 struct M_EVENT_CLASS_NAME : M_EVENT_CLASS_NAME##Helper
 
+// Generic iOS events.
+
+CURRENT_EVENT(iOSEvent, MidichloriansEvent) {
+    std::string description;
+    template<typename A> void serialize(A& ar) {
+        SUPER::serialize(ar);
+        ar(CEREAL_NVP(description));
+    }
+    iOSEvent() = default;
+    iOSEvent(const std::string& d) : description(d) {}
+};
+
+CURRENT_EVENT(iOSAppLaunchEvent, iOSEvent) {
+    std::string cf_version;
+    uint64_t app_install_time;
+    uint64_t app_update_time;
+    template<typename A> void serialize(A& ar) {
+        SUPER::serialize(ar);
+        ar(CEREAL_NVP(cf_version), CEREAL_NVP(app_install_time), CEREAL_NVP(app_update_time));
+    }
+    iOSAppLaunchEvent() = default;
+    iOSAppLaunchEvent(const std::string& cf_version, uint64_t app_install_time, uint64_t app_update_time) : cf_version(cf_version), app_install_time(app_install_time), app_update_time(app_update_time) {
+        description = "*FinishLaunchingWithOptions";
+    }
+};
+
+CURRENT_EVENT(iOSFocusEvent, iOSEvent) {
+    bool activated;  // True if gained focus, false if lost focus.
+    template<typename A> void serialize(A& ar) {
+        SUPER::serialize(ar);
+        ar(CEREAL_NVP(activated));
+    }
+    iOSFocusEvent() = default;
+    iOSFocusEvent(bool a, const std::string& d) {
+        description = d;
+        activated = a;
+    }
+};
 
 @interface Midichlorians : NSObject
 
