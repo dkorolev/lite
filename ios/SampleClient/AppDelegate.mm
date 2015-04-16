@@ -42,24 +42,23 @@
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
-    [Midichlorians emit:EventWillResignActive()];
-  // [Midichlorians logEvent:@"$willResignActive"];
+    [Midichlorians emit:iOSFocusEvent(false, "applicationWillResignActive")];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-  [Midichlorians emit:EventDidEnterBackground()];
+    [Midichlorians emit:iOSFocusEvent(false, "applicationDidEnterBackground")];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
-  // [Midichlorians logEvent:@"$willEnterForeground"];
+    [Midichlorians emit:iOSFocusEvent(true, "applicationWillEnterForeground")];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-  // [Midichlorians logEvent:@"$didBecomeActive"];
+    [Midichlorians emit:iOSFocusEvent(true, "applicationDidBecomeActive")];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-  //[Midichlorians logEvent:@"$willTerminate"];
+    [Midichlorians emit:iOSFocusEvent(false, "applicationWillTerminate")];
 }
 
 @end

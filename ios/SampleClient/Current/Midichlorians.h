@@ -33,9 +33,11 @@
 #define CURRENT_MIDICHLORIANS_H
 
 #include <string>
- 
+
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+
+#include "../../../Bricks/cerealize/cerealize.h"
 
 struct MidichloriansEvent {
     template <class A>
@@ -45,6 +47,29 @@ struct MidichloriansEvent {
         return "<UNDEFINED EVENT>";
     }
 };
+
+// A helper macro to define structured events.
+
+#ifdef CURRENT_EVENT
+#error "The `CURRENT_EVENT` macro should not be defined."
+#endif
+
+#define CURRENT_EVENT(M_EVENT_CLASS_NAME, M_IMMEDIATE_BASE)         \
+struct M_EVENT_CLASS_NAME;                                  \
+CEREAL_REGISTER_TYPE(M_EVENT_CLASS_NAME);                   \
+struct M_EVENT_CLASS_NAME##Helper : MidichloriansEvent {    \
+typedef MidichloriansEvent CEREAL_BASE_TYPE;              \
+typedef M_IMMEDIATE_BASE SUPER;                           \
+virtual std::string EventAsString() const override {      \
+return JSON(WithBaseType<MidichloriansEvent>(*this));   \
+}                                                         \
+template <class A>                                        \
+void serialize(A& ar) {                                   \
+SUPER::serialize(ar);                                   \
+}                                                         \
+};                                                          \
+struct M_EVENT_CLASS_NAME : M_EVENT_CLASS_NAME##Helper
+
 
 @interface Midichlorians : NSObject
 

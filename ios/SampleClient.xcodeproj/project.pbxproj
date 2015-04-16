@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		32A1E54F1ADF00C00094AE54 /* Midichlorians.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32A1E54E1ADF00C00094AE54 /* Midichlorians.mm */; };
-		32D226D51ADF7FF000D35847 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32D226D41ADF7FF000D35847 /* ViewController.mm */; };
+		32D226D71ADF999600D35847 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32D226D61ADF999600D35847 /* ViewController.mm */; };
 		32E5E5671ADF196B0092B25C /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 32E5E5661ADF196B0092B25C /* AppDelegate.mm */; };
 		6BD1AAFD1A8E5AD8000CB093 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6BD1AAFC1A8E5AD8000CB093 /* libz.dylib */; };
 		6BDB7FDC1AA4884B0036C3CB /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6BDB7FDB1AA4884B0036C3CB /* AdSupport.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -21,7 +21,7 @@
 /* Begin PBXFileReference section */
 		32A1E54D1ADF00C00094AE54 /* Midichlorians.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Midichlorians.h; path = Current/Midichlorians.h; sourceTree = "<group>"; };
 		32A1E54E1ADF00C00094AE54 /* Midichlorians.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Midichlorians.mm; path = Current/Midichlorians.mm; sourceTree = "<group>"; };
-		32D226D41ADF7FF000D35847 /* ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ViewController.mm; path = SampleClient/ViewController.mm; sourceTree = "<group>"; };
+		32D226D61ADF999600D35847 /* ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
 		32E5E5651ADF18610092B25C /* data_dictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = data_dictionary.h; sourceTree = "<group>"; };
 		32E5E5661ADF196B0092B25C /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
 		6BD1AAE71A8E53EC000CB093 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -52,7 +52,6 @@
 		6BDEF0481A3CF2D100054FAC = {
 			isa = PBXGroup;
 			children = (
-				32D226D41ADF7FF000D35847 /* ViewController.mm */,
 				6BDEF0531A3CF2D100054FAC /* SampleClient */,
 				6BDEF0521A3CF2D100054FAC /* Products */,
 			);
@@ -69,6 +68,7 @@
 		6BDEF0531A3CF2D100054FAC /* SampleClient */ = {
 			isa = PBXGroup;
 			children = (
+				32D226D61ADF999600D35847 /* ViewController.mm */,
 				32E5E5661ADF196B0092B25C /* AppDelegate.mm */,
 				32E5E5651ADF18610092B25C /* data_dictionary.h */,
 				32A1E54D1ADF00C00094AE54 /* Midichlorians.h */,
@@ -163,7 +163,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32D226D51ADF7FF000D35847 /* ViewController.mm in Sources */,
+				32D226D71ADF999600D35847 /* ViewController.mm in Sources */,
 				32A1E54F1ADF00C00094AE54 /* Midichlorians.mm in Sources */,
 				32E5E5671ADF196B0092B25C /* AppDelegate.mm in Sources */,
 				6BDEF0571A3CF2D100054FAC /* main.m in Sources */,
