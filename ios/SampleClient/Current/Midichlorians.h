@@ -25,27 +25,35 @@
  SOFTWARE.
  *******************************************************************************/
 
+#ifndef __cplusplus
+#error "This file is a C++ header, and it should be `#include`-d or `#import`-ed from an `.mm`, not an `.m` source file."
+#endif
+
 #ifndef CURRENT_MIDICHLORIANS_H
 #define CURRENT_MIDICHLORIANS_H
+
+#include <string>
  
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 
+struct MidichloriansEvent {
+    template <class A>
+    void serialize(A& ar) {
+    }
+    virtual std::string EventAsString() const {
+        return "<UNDEFINED EVENT>";
+    }
+};
+
 @interface Midichlorians : NSObject
 
-// Should be called in application:didFinishLaunchingWithOptions:
+// To be called in application:didFinishLaunchingWithOptions:
 // or in application:willFinishLaunchingWithOptions:
 + (void)setup:(NSString *)serverUrl withLaunchOptions:(NSDictionary *)options;
 
-// Alternative to the previous setup method when not using automatic detection 
-// of whether the application is being launched for the first time.
-+ (void)setup:(NSString *)serverUrl andFirstLaunch:(BOOL)isFirstLaunch withLaunchOptions:(NSDictionary *)options;
-
-// Various logging methods.
-+ (void)logEvent:(NSString *)event;
-+ (void)logEvent:(NSString *)event withValue:(NSString *)value;
-+ (void)logEvent:(NSString *)event withKeyValueArray:(NSArray *)array;
-+ (void)logEvent:(NSString *)event withDictionary:(NSDictionary *)dictionary;
+// Emits the event.
++ (void)emit:(const MidichloriansEvent&) event;
 
 @end
 

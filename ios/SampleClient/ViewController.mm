@@ -34,12 +34,12 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [Midichlorians logEvent:@"ViewControllerDidLoad" withDictionary:[NSBundle mainBundle].infoDictionary ];
+  // [Midichlorians logEvent:@"ViewControllerDidLoad" withDictionary:[NSBundle mainBundle].infoDictionary ];
 }
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];
-  [Midichlorians logEvent:@"didReceiveMemoryWarning"];
+  // [Midichlorians logEvent:@"didReceiveMemoryWarning"];
 }
 
 @end

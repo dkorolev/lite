@@ -25,10 +25,6 @@
  SOFTWARE.
  *******************************************************************************/
 
-#if !__has_feature(objc_arc)
-#error "This file must be compiled with ARC. Either turn on ARC for the project or use -fobjc-arc flag."
-#endif
-
 #import "midichlorians.h"
 
 #include <string>
@@ -104,7 +100,9 @@ static std::map<std::string, std::string> ToStringMap(NSArray *nsArray) {
     return map;
 }
 
-// Returns string representing uint64_t timestamp of given file or directory.
+    /*
+
+// Returns a string representing uint64_t timestamp of given file or directory.
 // Uses modification date in Unix epoch milliseconds, if available.
 static std::string PathTimestampMillis(NSString *path) {
     NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil];
@@ -132,7 +130,8 @@ static std::pair<std::string, bool> InstallationId() {
     }
     return std::make_pair([installationId UTF8String], firstLaunch);
 }
-
+*/
+    
 /*
  #if (TARGET_OS_IPHONE > 0)
  static std::map<std::string, std::string> ParseLaunchOptions(NSDictionary * options) {
@@ -151,6 +150,7 @@ static std::pair<std::string, bool> InstallationId() {
  #endif  // (TARGET_OS_IPHONE > 0)
  */
 
+    /*
 #if (TARGET_OS_IPHONE > 0)
 static std::string RectToString(CGRect const &rect) {
     return std::to_string(static_cast<int>(rect.origin.x)) + " " +
@@ -160,6 +160,8 @@ static std::string RectToString(CGRect const &rect) {
 }
 #endif  // (TARGET_OS_IPHONE > 0)
 
+     */
+    
 struct AsStringImpl {
     static std::string Invoke(const std::string& s) {
         return s;
@@ -319,6 +321,7 @@ private:
 
 using Stats = StatsImpl<consumer::POSTviaHTTP>;
 
+    /*
 #if (TARGET_OS_IPHONE > 0)
 // Logs some basic device's info.
 static void LogSystemInformation() {
@@ -380,6 +383,8 @@ static void LogSystemInformation() {
     }
 }
 #endif  // (TARGET_OS_IPHONE > 0)
+     
+     */
 
 } // namespace midichlorians
 
@@ -465,6 +470,10 @@ withLaunchOptions:(NSDictionary *)options {
 
 + (void)logEvent:(NSString *)event withDictionary:(NSDictionary *)dictionary {
     Stats::Instance().LogEvent(UnsafeToStdString(event), ToStringMap(dictionary));
+}
+
++ (void)emit:(const MidichloriansEvent &)event {
+    Stats::Instance().LogEvent(event.EventAsString());  // UnsafeToStdString(event));
 }
 
 @end
