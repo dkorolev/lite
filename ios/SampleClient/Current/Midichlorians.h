@@ -114,6 +114,19 @@ CURRENT_EVENT(iOSAppLaunchEvent, iOSEvent) {
   }
 };
 
+CURRENT_EVENT(iOSDeviceInfo, iOSEvent) {
+    std::map<std::string, std::string> info;
+    template <typename A>
+    void serialize(A & ar) {
+        SUPER::serialize(ar);
+        ar(CEREAL_NVP(info));
+    }
+    iOSDeviceInfo() = default;
+    iOSDeviceInfo(const std::map<std::string, std::string>& info) : info(info) {
+        description = "iPhoneInfo";
+    }
+};
+
 CURRENT_EVENT(iOSFocusEvent, iOSEvent) {
   bool activated;  // True if gained focus, false if lost focus.
   template <typename A>

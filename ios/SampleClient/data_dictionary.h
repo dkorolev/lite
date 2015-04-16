@@ -29,6 +29,4 @@ SOFTWARE.
 
 #include "Current/Midichlorians.h"
 
-// typedef std::tuple<EventWillResignActive, EventDidEnterBackground> EVENTS_TYPE_LIST;
-
 #endif  // DATA_DICTIONARY_H

@@ -56,7 +56,6 @@
 
 namespace midichlorians {
 
-    /*
 // Conversion from [possible nil] `NSString` to `std::string`.
 static std::string UnsafeToStdString(NSString *nsString) {
     if (nsString) {
@@ -66,6 +65,7 @@ static std::string UnsafeToStdString(NSString *nsString) {
     }
 }
 
+    /*
 // Additional check if the object can be represented as a string.
 static std::string ToStdString(id object) {
     if ([object isKindOfClass:[NSString class]]) {
@@ -116,7 +116,6 @@ static uint64_t PathTimestampMillis(NSString *path) {
         return 0ull;
     }
 }
-    
 
 // Returns <unique id, true if it's the very-first app launch>.
 static std::pair<std::string, bool> InstallationId() {
@@ -154,17 +153,12 @@ static std::pair<std::string, bool> InstallationId() {
  #endif  // (TARGET_OS_IPHONE > 0)
  */
 
-    /*
-#if (TARGET_OS_IPHONE > 0)
 static std::string RectToString(CGRect const &rect) {
     return std::to_string(static_cast<int>(rect.origin.x)) + " " +
     std::to_string(static_cast<int>(rect.origin.y)) + " " +
     std::to_string(static_cast<int>(rect.size.width)) + " " +
     std::to_string(static_cast<int>(rect.size.height));
 }
-#endif  // (TARGET_OS_IPHONE > 0)
-
-     */
     
     /*
 struct AsStringImpl {
@@ -192,8 +186,8 @@ template<typename T> std::string AsString(T&& s) {
      */
 
 namespace consumer {
-    
     namespace thread_unsafe {
+        
         class NSLog {
         public:
             void OnMessage(const std::string& message) {
@@ -221,7 +215,6 @@ namespace consumer {
                     
                     const std::string url = "http://localhost:8686/log";
                     
-                    // This is Xcode's "neat" indentation format. Don't ask me WTF it is. -- @dkorolev
                     NSMutableURLRequest * req =
                     [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
                     // TODO(dkorolev): Add this line. I can't deal with its syntax. Objective-C is killing me.                                      cachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
@@ -252,9 +245,9 @@ namespace consumer {
         };
     }
     
-    // A straightforward implementation for wrapping
-    // calls from multiple sources into a single thread, preserving the order.
-    // NOTE: In production, a more advanced implementation is normally used,
+    // A straightforward implementation for wrapping calls from multiple sources into a single thread,
+    // preserving the order.
+    // NOTE: In production, a more advanced implementation should be used,
     // with more efficient in-memory message queue and with optionally persistent storage of events.
     template<class T_SINGLE_THREADED_IMPL> class SimplestThreadSafeWrapper : public T_SINGLE_THREADED_IMPL {
     public:
@@ -314,79 +307,14 @@ namespace consumer {
     
 }  // namespace consumer
 
-    template<typename T> struct Singleton {
-        static T& Instance() {
-            static T instance;
-            return instance;
-        }
-    };
+template<typename T> struct Singleton {
+    static T& Instance() {
+        static T instance;
+        return instance;
+    }
+};
 
-    using Stats = consumer::POSTviaHTTP;
-
-    /*
-#if (TARGET_OS_IPHONE > 0)
-// Logs some basic device's info.
-static void LogSystemInformation() {
-    UIDevice *device = [UIDevice currentDevice];
-    UIScreen *screen = [UIScreen mainScreen];
-    std::string preferredLanguages;
-    for (NSString *lang in [NSLocale preferredLanguages]) {
-        preferredLanguages += [lang UTF8String] + std::string(" ");
-    }
-    std::string preferredLocalizations;
-    for (NSString *loc in [[NSBundle mainBundle] preferredLocalizations]) {
-        preferredLocalizations += [loc UTF8String] + std::string(" ");
-    }
-    NSLocale *locale = [NSLocale currentLocale];
-    std::string userInterfaceIdiom = "phone";
-    if (device.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
-        userInterfaceIdiom = "pad";
-    } else if (device.userInterfaceIdiom == UIUserInterfaceIdiomUnspecified) {
-        userInterfaceIdiom = "unspecified";
-    }
-    std::map<std::string, std::string> info = {
-        {"deviceName", UnsafeToStdString(device.name)},
-        {"deviceSystemName", UnsafeToStdString(device.systemName)},
-        {"deviceSystemVersion", UnsafeToStdString(device.systemVersion)},
-        {"deviceModel", UnsafeToStdString(device.model)},
-        {"deviceUserInterfaceIdiom", userInterfaceIdiom},
-        {"screens", std::to_string([UIScreen screens].count)},
-        {"screenBounds", RectToString(screen.bounds)},
-        {"screenScale", std::to_string(screen.scale)},
-        {"preferredLanguages", preferredLanguages},
-        {"preferredLocalizations", preferredLocalizations},
-        {"localeIdentifier", UnsafeToStdString([locale objectForKey:NSLocaleIdentifier])},
-        {"calendarIdentifier", UnsafeToStdString([[locale objectForKey:NSLocaleCalendar] calendarIdentifier])},
-        {"localeMeasurementSystem", UnsafeToStdString([locale objectForKey:NSLocaleMeasurementSystem])},
-        {"localeDecimalSeparator", UnsafeToStdString([locale objectForKey:NSLocaleDecimalSeparator])},
-    };
-    if (device.systemVersion.floatValue >= 8.0) {
-        info.emplace("screenNativeBounds", RectToString(screen.nativeBounds));
-        info.emplace("screenNativeScale", std::to_string(screen.nativeScale));
-    }
-    Stats &instance = Stats::Instance();
-    instance.LogEvent("$iosDeviceInfo", info);
-    
-    info.clear();
-    if (device.systemVersion.floatValue >= 6.0) {
-        if (device.identifierForVendor) {
-            info.emplace("identifierForVendor", UnsafeToStdString(device.identifierForVendor.UUIDString));
-        }
-        if (NSClassFromString(@"ASIdentifierManager")) {
-            ASIdentifierManager *manager = [ASIdentifierManager sharedManager];
-            info.emplace("isAdvertisingTrackingEnabled", manager.isAdvertisingTrackingEnabled ? "YES" : "NO");
-            if (manager.advertisingIdentifier) {
-                info.emplace("advertisingIdentifier", UnsafeToStdString(manager.advertisingIdentifier.UUIDString));
-            }
-        }
-    }
-    if (!info.empty()) {
-        instance.LogEvent("$iosDeviceIds", info);
-    }
-}
-#endif  // (TARGET_OS_IPHONE > 0)
-     
-     */
+using Stats = consumer::POSTviaHTTP;
 
 } // namespace midichlorians
 
@@ -402,20 +330,9 @@ using namespace midichlorians;
     instance.SetServerUrl([serverUrl UTF8String]);
     instance.SetDeviceId(installationId.first);
     
-     // Calculate some basic statistics about installations/updates/launches.
-  //   NSUserDefaults * userDataBase = [NSUserDefaults standardUserDefaults];
-    
-    
-    /*
     // Documents folder modification time can be interpreted as "app install time".
-     // App bundle modification time can be interpreted as "app update time".
-         
-     instance.LogEvent("$install", {{"CFBundleShortVersionString", [version UTF8String]},
-     {"documentsTimestampMillis", PathTimestampMillis([NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-     NSUserDomainMask, YES) firstObject])},
-     {"bundleTimestampMillis", PathTimestampMillis([[NSBundle mainBundle] executablePath])}});
-         */
-    
+    // App bundle modification time can be interpreted as "app update time".
+
     if (installationId.second) {
         [Midichlorians emit:iOSEvent("firstLaunch")];
     }
@@ -426,41 +343,57 @@ using namespace midichlorians;
                                           PathTimestampMillis([[NSBundle mainBundle] executablePath]))
                                           ];
     
-         /*
-     [userDataBase setValue:version forKey:@"AlohalyticsInstalledVersion"];
-     [userDataBase synchronize];
-     #if (TARGET_OS_IPHONE > 0)
-     LogSystemInformation();
-     #else
-     static_cast<void>(options);  // Unused variable warning fix.
-     #endif  // TARGET_OS_IPHONE
-     forceUpload = true;
-     } else {
-     NSString * version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-     if (installedVersion == nil || ![installedVersion isEqualToString:version]) {
-     instance.LogEvent("$update", {{"CFBundleShortVersionString", [version UTF8String]},
-     {"documentsTimestampMillis",
-     PathTimestampMillis([NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)
-     firstObject])},
-     {"bundleTimestampMillis", PathTimestampMillis([[NSBundle mainBundle] executablePath])}});
-     [userDataBase setValue:version forKey:@"AlohalyticsInstalledVersion"];
-     [userDataBase synchronize];
-     #if (TARGET_OS_IPHONE > 0)
-     LogSystemInformation();
-     #endif  // (TARGET_OS_IPHONE > 0)
-     forceUpload = true;
+#if (TARGET_OS_IPHONE > 0)
+     UIDevice *device = [UIDevice currentDevice];
+     UIScreen *screen = [UIScreen mainScreen];
+     std::string preferredLanguages;
+     for (NSString *lang in [NSLocale preferredLanguages]) {
+     preferredLanguages += [lang UTF8String] + std::string(" ");
+     }
+     std::string preferredLocalizations;
+     for (NSString *loc in [[NSBundle mainBundle] preferredLocalizations]) {
+     preferredLocalizations += [loc UTF8String] + std::string(" ");
+     }
+     NSLocale *locale = [NSLocale currentLocale];
+     std::string userInterfaceIdiom = "phone";
+     if (device.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+     userInterfaceIdiom = "pad";
+     } else if (device.userInterfaceIdiom == UIUserInterfaceIdiomUnspecified) {
+     userInterfaceIdiom = "unspecified";
+     }
+     std::map<std::string, std::string> info = {
+     {"deviceName", UnsafeToStdString(device.name)},
+     {"deviceSystemName", UnsafeToStdString(device.systemName)},
+     {"deviceSystemVersion", UnsafeToStdString(device.systemVersion)},
+     {"deviceModel", UnsafeToStdString(device.model)},
+     {"deviceUserInterfaceIdiom", userInterfaceIdiom},
+     {"screens", std::to_string([UIScreen screens].count)},
+     {"screenBounds", RectToString(screen.bounds)},
+     {"screenScale", std::to_string(screen.scale)},
+     {"preferredLanguages", preferredLanguages},
+     {"preferredLocalizations", preferredLocalizations},
+     {"localeIdentifier", UnsafeToStdString([locale objectForKey:NSLocaleIdentifier])},
+     {"calendarIdentifier", UnsafeToStdString([[locale objectForKey:NSLocaleCalendar] calendarIdentifier])},
+     {"localeMeasurementSystem", UnsafeToStdString([locale objectForKey:NSLocaleMeasurementSystem])},
+     {"localeDecimalSeparator", UnsafeToStdString([locale objectForKey:NSLocaleDecimalSeparator])},
+     };
+     if (device.systemVersion.floatValue >= 8.0) {
+     info.emplace("screenNativeBounds", RectToString(screen.nativeBounds));
+     info.emplace("screenNativeScale", std::to_string(screen.nativeScale));
+     }
+
+     if (NSClassFromString(@"ASIdentifierManager")) {
+     ASIdentifierManager *manager = [ASIdentifierManager sharedManager];
+     info.emplace("isAdvertisingTrackingEnabled", manager.isAdvertisingTrackingEnabled ? "YES" : "NO");
+     if (manager.advertisingIdentifier) {
+     info.emplace("advertisingIdentifier", UnsafeToStdString(manager.advertisingIdentifier.UUIDString));
      }
      }
-     instance.LogEvent("$launch"
-     #if (TARGET_OS_IPHONE > 0)
-     , ParseLaunchOptions(options)
-     #endif  // (TARGET_OS_IPHONE > 0)
-     );
-     // Force uploading to get first-time install information before uninstall.
-     if (forceUpload) {
-     instance.Upload();
+
+     if (!info.empty()) {
+         [Midichlorians emit:iOSDeviceInfo(info)];
      }
-     */
+#endif  // (TARGET_OS_IPHONE > 0)
 }
 
 + (void)emit:(const MidichloriansEvent &)event {
