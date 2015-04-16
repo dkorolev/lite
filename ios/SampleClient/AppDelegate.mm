@@ -40,23 +40,23 @@
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
-    [Midichlorians emit:iOSFocusEvent(false, "applicationWillResignActive")];
+  [Midichlorians emit:iOSFocusEvent(false, "applicationWillResignActive")];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-    [Midichlorians emit:iOSFocusEvent(false, "applicationDidEnterBackground")];
+  [Midichlorians emit:iOSFocusEvent(false, "applicationDidEnterBackground")];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
-    [Midichlorians emit:iOSFocusEvent(true, "applicationWillEnterForeground")];
+  [Midichlorians emit:iOSFocusEvent(true, "applicationWillEnterForeground")];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-    [Midichlorians emit:iOSFocusEvent(true, "applicationDidBecomeActive")];
+  [Midichlorians emit:iOSFocusEvent(true, "applicationDidBecomeActive")];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-    [Midichlorians emit:iOSFocusEvent(false, "applicationWillTerminate")];
+  [Midichlorians emit:iOSFocusEvent(false, "applicationWillTerminate")];
 }
 
 @end
